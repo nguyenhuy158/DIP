@@ -1,0 +1,71 @@
+import numpy as np
+import time
+import cv2
+
+# variable
+path = '4_digits.png'
+pathOutput = "image_03_01.png"
+width_threshod_min = 20
+height_threshod_min = 20
+width_threshod_max = 570
+height_threshod_max = 570
+
+source_image = cv2.imread(path)
+output_image = cv2.imread(path)
+
+source_image = cv2.cvtColor(source_image, cv2.COLOR_BGR2GRAY)
+# source_image = cv2.medianBlur(source_image, 3)
+
+print('shape', source_image.shape)
+
+ret, binaryTheshold = cv2.threshold(source_image, 80, 255, cv2.THRESH_BINARY)
+binaryTheshold = cv2.fastNlMeansDenoising(src=binaryTheshold)
+# # cp_binaryTheshold = binaryTheshold
+# # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+# kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+# # kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+
+# binaryTheshold = cv2.morphologyEx(binaryTheshold, cv2.MORPH_OPEN, kernel)
+# binaryTheshold = cv2.morphologyEx(binaryTheshold, cv2.MORPH_OPEN, kernel)
+
+contours, hierarchy = cv2.findContours(
+    image=binaryTheshold, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE
+)
+
+for cnt in contours:
+    x, y, w, h = cv2.boundingRect(cnt)
+    #     # print(x, y, w, h)
+
+    #     if w < width_threshod_min or h < height_threshod_min:
+    #         continue
+    #     if w > width_threshod_max or h > height_threshod_max:
+    #         continue
+    cv2.rectangle(output_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+# fix number error
+
+# cp_binaryTheshold = cv2.GaussianBlur(
+#     src=cp_binaryTheshold, ksize=(3, 3), sigmaX=1, sigmaY=0, borderType=cv2.BORDER_DEFAULT)
+# num = np.ones(shape=cp_binaryTheshold.shape, dtype=np.uint8)
+# num[:80, :580] = cp_binaryTheshold[:80, :580]
+# num = cv2.morphologyEx(num, cv2.MORPH_OPEN, kernel, iterations=3)
+# # num = cv2.cvtColor(num, cv2.COLOR_GRAY2RGB)
+# # num = cv2.cvtColor(num, cv2.COLOR_RGB2GRAY)
+# contours, hierarchy = cv2.findContours(
+#     image=num, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE
+# )
+
+# for cnt in contours:
+#     x, y, w, h = cv2.boundingRect(cnt)
+#     print('s')
+#     print(x, y, w, h)
+
+#     cv2.rectangle(output_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+# end fix number
+
+# cv2.imshow('num', num)
+cv2.imshow('binaryTheshold', binaryTheshold)
+cv2.imshow('source_image', output_image)
+cv2.waitKey()
+cv2.destroyAllWindows()
